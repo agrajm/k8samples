@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: captureorder
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  tls:
+  - hosts:
+    - captureorder.13.70.153.11.nip.io
+    secretName: captureorder-tls-secret
+  rules:
+  - host: captureorder.13.70.153.11.nip.io
+    http:
+      paths:
+      - backend:
+          serviceName: capture-order
+          servicePort: 80
+        path: /
