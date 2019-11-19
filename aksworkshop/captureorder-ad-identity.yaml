@@ -1,0 +1,8 @@
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentity
+metadata:
+  name: captureorder-ad-id
+spec:
+  type: 0
+  ResourceID: /subscriptions/9616e202-5bdf-4642-87f7-1b493fcbaab5/resourcegroups/kafkaaksRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aksidentitypodauth
+  ClientID: 29cc2856-7717-4aef-82e5-1663a2d79b2a
