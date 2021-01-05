@@ -1,0 +1,49 @@
+
+CKA - Kubeadm to install k8s cluster in Azure
+
+
+	https://blog.jreypo.io/containers/microsoft/azure/cloud/cloud-native/devops/deploying-a-kubernetes-cluster-in-azure-using-kubeadm/
+
+	https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+
+
+
+Steps
+
+
+	az group create -n k8s-kubeadm --location australiaeast
+
+	az network vnet create --name k8s-vnet --resource-group k8s-kubeadm --location australiaeast --address-prefixes 172.10.0.0/16 --subnet-name k8s-subnet1 --subnet-prefixes 172.10.1.0/24
+
+	./setup-azure-vms.sh to create VMs 
+
+	On each node ssh and then execute ./setup-kubeadm-kubelet-kubectl.sh 
+
+	Configure kubeadm via config files
+		- init configuration for control plane node
+		- configuration for cloud provider (azure or aws) - https://kubernetes-sigs.github.io/cloud-provider-azure/install/configs/
+
+	 sudo kubeadm init --config kubeadm.yaml 
+
+		Your Kubernetes control-plane has initialized successfully!
+
+		To start using your cluster, you need to run the following as a regular user:
+
+		  mkdir -p $HOME/.kube
+		  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+		  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+		Alternatively, if you are the root user, you can run:
+
+		  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+		You should now deploy a pod network to the cluster.
+		Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+		  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+		Then you can join any number of worker nodes by running the following on each as root:
+
+		sudo kubeadm join 172.10.1.4:6443 --token juxqw5.08e718brxhidaq5m --discovery-token-ca-cert-hash sha256:da1e6f3212b92a0caf6377085f44437db75007b1216e6b506000033c7ea95fe7 
+
+
+
