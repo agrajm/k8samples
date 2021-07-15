@@ -105,8 +105,19 @@ az group create --name $RG --location $LOCATION
 az network vnet create --name k8s-vnet --resource-group $RG --location $LOCATION --address-prefixes 172.10.0.0/16 --subnet-name k8s-subnet1 --subnet-prefixes 172.10.1.0/24
 
 SUBNET_ID=$(az network vnet show --name k8s-vnet -g $RG --query subnets[0].id -o tsv)
+```
+### Bastion
+```
+az network vnet subnet create -g $RG --vnet-name k8s-vnet -n AzureBastionSubnet \
+    --address-prefixes 172.10.2.0/24
 
-# Master instance
+az network public-ip create --resource-group $RG --name MyBastionPIP --sku Standard --location $LOCATION
+
+az network bastion create --location $LOCATION --name MyBastionHost --public-ip-address MyBastionPIP --resource-group $RG --vnet-name k8s-vnet
+```
+
+### Master instance - No PIP
+```
 echo "Creating Kubernetes Master"
 az vm create --name kube-master \
    --resource-group $RG \
@@ -117,10 +128,10 @@ az vm create --name kube-master \
    --size Standard_DS2_v2 \
    --data-disk-sizes-gb 10 \
    --subnet $SUBNET_ID \
-   --public-ip-address-dns-name kubeadm-master-lab
-
-# Nodes intances
-
+   --public-ip-address ""
+```
+### Nodes intances
+```
 az vm availability-set create --name kubeadm-nodes-as --resource-group $RG
 
 for i in 0 1 2; do 
@@ -135,7 +146,7 @@ for i in 0 1 2; do
        --size Standard_DS2_v2 \
        --data-disk-sizes-gb 10 \
        --subnet $SUBNET_ID \
-       --public-ip-address-dns-name kubeadm-node-lab-${i}
+       --public-ip-address ""
 done
 
 az vm list --resource-group $RG -d
@@ -257,6 +268,13 @@ kubectl get nodes -o wide
 kubeadm join 172.10.1.4:6443 --token t3fequ.cmu59t4lfw8j8p3u \
         --discovery-token-ca-cert-hash sha256:9f773c118ffac84de197e635e3c2c8853ab9171f81ef51aad7e76b2311f0c4b3
 ```
+If this fails in pre-flight checks - can be due to https://github.com/containerd/containerd/issues/4581
+So do the following first
+```
+sudo rm /etc/containerd/config.toml
+sudo systemctl restart containerd
+```
+Now again do kubeadm join 
 
 Do this on each worker node. You might have to point to the kubeconfig at /etc/kuberenetes/kubelet.conf for kubectl to work
 
