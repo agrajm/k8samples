@@ -116,6 +116,9 @@ az network public-ip create --resource-group $RG --name MyBastionPIP --sku Stand
 az network bastion create --location $LOCATION --name MyBastionHost --public-ip-address MyBastionPIP --resource-group $RG --vnet-name k8s-vnet
 ```
 
+#### TODO 
+Add a NSG rule to all VMs allowing SSH from Bastion Address prefix only 
+
 ### Master instance - No PIP
 ```
 echo "Creating Kubernetes Master"
